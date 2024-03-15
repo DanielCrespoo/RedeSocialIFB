@@ -1,0 +1,124 @@
+import React, { Component } from "react";
+import { Routes, Route, Link } from "react-router-dom";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+
+import AuthService from "./services/auth.service";
+
+import Login from "./components/login.component";
+import Register from "./components/register.component";
+import Home from "./components/home.component";
+import Profile from "./components/profile.component";
+import User from "./components/user.component";
+import AllProfile from "./components/allprofiles.component";
+
+class App extends Component {
+  constructor(props) {
+    super(props);
+    this.logOut = this.logOut.bind(this);
+
+    this.state = {
+      currentUser: undefined,
+    };
+  }
+
+  componentDidMount() {
+    const user = AuthService.getCurrentUser();
+
+    if (user) {
+      this.setState({
+        currentUser: user,
+      });
+    }
+  }
+
+  logOut() {
+    AuthService.logout();
+    this.setState({
+      currentUser: undefined,
+    });
+  }
+
+  render() {
+    const { currentUser } = this.state;
+
+    return (
+      <div>
+        <nav className="navbar navbar-expand navbar-dark bg-dark">
+          <Link to={"/"} className="navbar-brand">
+            RedeSocial
+          </Link>
+          <div className="navbar-nav mr-auto">
+            <li className="nav-item">
+              <Link to={"/home"} className="nav-link">
+                Principal
+              </Link>
+            </li>
+
+            {currentUser && (
+              <li className="nav-item">
+                <Link to={"/perfil"} className="nav-link">
+                  Usuario Logado
+                </Link>
+              </li>
+            )}
+
+            {currentUser && (
+              <li className="nav-item">
+                <Link to={"/perfis"} className="nav-link">
+                  Todos os usuarios
+                </Link>
+              </li>
+            )}
+
+            {currentUser && (
+              <li className="nav-item">
+                <Link to={"/"} className="nav-link" onClick={this.logOut}>
+                  Sair
+                </Link>
+              </li>
+            )}
+          </div>
+
+          {currentUser ? (
+            <div className="navbar-nav ml-auto">
+              <li className="nav-item">
+                <Link to={"/perfil"} className="nav-link">
+                  {currentUser.nome}
+                </Link>
+              </li>
+            </div>
+          ) : (
+            <div className="navbar-nav ml-auto">
+              <li className="nav-item">
+                <Link to={"/login"} className="nav-link">
+                  Entrar
+                </Link>
+              </li>
+
+              <li className="nav-item">
+                <Link to={"/perfisregistrar"} className="nav-link">
+                  Registrar
+                </Link>
+              </li>
+            </div>
+          )}
+        </nav>
+
+        <div className="container mt-3">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/perfisregistrar" element={<Register />} />
+            <Route path="/perfil" element={<Profile />} />
+            <Route path="/perfil/:id" element={<User />} />
+            <Route path="/perfis" element={<AllProfile />} />
+          </Routes>
+        </div>
+      </div>
+    );
+  }
+}
+
+export default App;
